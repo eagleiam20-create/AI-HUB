@@ -6,123 +6,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b0b12">
   <title>NEXA AI — Your AI Workspace</title>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     :root {
-      --bg:#0b0b12;
-      --panel:#12121d;
-      --panel2:#191927;
-      --border:#29293b;
-      --text:#f4f2ff;
-      --muted:#a3a1ba;
-      --accent:#a78bfa;
-      --green:#62d6a5;
-      --danger:#ff8585;
+      --bg:#0b0b12; --panel:#12121d; --panel2:#191927;
+      --border:#29293b; --text:#f4f2ff; --muted:#a3a1ba;
+      --accent:#a78bfa; --green:#62d6a5; --danger:#ff8585;
     }
-
     * { box-sizing:border-box; }
-    body {
-      margin:0;
-      min-height:100vh;
-      background:var(--bg);
-      color:var(--text);
-      font-family:Inter,system-ui,Arial,sans-serif;
-    }
-
+    body { margin:0; min-height:100vh; background:var(--bg); color:var(--text); font-family:Inter,system-ui,Arial,sans-serif; }
     button,input,textarea { font:inherit; }
     button { cursor:pointer; }
-    button:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible {
-      outline:2px solid var(--accent);
-      outline-offset:3px;
-    }
+    button:focus-visible,input:focus-visible,textarea:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
     .hidden { display:none!important; }
     .muted { color:var(--muted); }
     .small { font-size:12px; line-height:1.6; }
     .brand { color:var(--accent); }
-    .btn {
-      min-height:42px;
-      padding:10px 14px;
-      border-radius:11px;
-      border:1px solid var(--border);
-      font-weight:650;
-    }
+    .btn { min-height:42px; padding:10px 14px; border-radius:11px; border:1px solid var(--border); font-weight:650; }
     .primary { background:var(--accent); color:#171024; border:0; }
     .secondary { background:var(--panel2); color:var(--text); }
     button:disabled { opacity:.55; cursor:not-allowed; }
 
     #authScreen {
-      min-height:100vh;
-      display:grid;
-      place-items:center;
-      padding:22px;
+      min-height:100vh; display:grid; place-items:center; padding:22px;
       background:radial-gradient(ellipse at 50% 0%,#35245d55,transparent 55%),var(--bg);
     }
-    .auth-card {
-      width:100%;
-      max-width:410px;
-      padding:30px;
-      border:1px solid var(--border);
-      border-radius:22px;
-      background:#12121def;
-      box-shadow:0 20px 70px #0005;
-    }
-    .logo {
-      display:grid;
-      place-items:center;
-      width:42px;
-      height:42px;
-      border-radius:13px;
-      background:linear-gradient(135deg,#c4b5fd,#8060df);
-      color:#171024;
-      font-size:23px;
-      font-weight:900;
-      margin-bottom:14px;
-    }
-    h1,h2,h3,p { overflow-wrap:anywhere; }
+    .auth-card { width:100%; max-width:410px; padding:30px; border:1px solid var(--border); border-radius:22px; background:#12121def; box-shadow:0 20px 70px #0005; }
+    .logo { display:grid; place-items:center; width:42px; height:42px; border-radius:13px; background:linear-gradient(135deg,#c4b5fd,#8060df); color:#171024; font-size:23px; font-weight:900; margin-bottom:14px; }
     .auth-card h1 { margin:0 0 8px; font-size:30px; }
     .auth-card p { color:var(--muted); line-height:1.6; }
     .field-label { display:block; font-size:13px; margin:16px 0 7px; }
-    .field {
-      width:100%;
-      min-height:45px;
-      padding:12px;
-      border:1px solid var(--border);
-      border-radius:11px;
-      background:#0b0b12;
-      color:var(--text);
-    }
+    .field { width:100%; min-height:45px; padding:12px; border:1px solid var(--border); border-radius:11px; background:#0b0b12; color:var(--text); }
     .auth-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:17px; }
     #authStatus,#appStatus { white-space:pre-wrap; overflow-wrap:anywhere; font-size:13px; line-height:1.6; color:var(--muted); }
 
     #appScreen { min-height:100vh; display:grid; grid-template-columns:245px minmax(0,1fr); }
-    aside {
-      border-right:1px solid var(--border);
-      background:#0e0e17;
-      padding:20px 14px;
-      display:flex;
-      flex-direction:column;
-      gap:20px;
-      min-width:0;
-    }
+    aside { border-right:1px solid var(--border); background:#0e0e17; padding:20px 14px; display:flex; flex-direction:column; gap:20px; min-width:0; }
     .brand-row { display:flex; align-items:center; gap:10px; padding:0 8px; }
     .brand-row .logo { width:35px; height:35px; font-size:20px; margin:0; }
     .brand-name { font-weight:850; letter-spacing:1px; }
     .nav-title { color:#79778f; font-size:10px; letter-spacing:1.5px; padding:0 10px; margin:7px 0; }
-    .nav-btn {
-      width:100%;
-      display:flex;
-      gap:10px;
-      align-items:center;
-      padding:12px;
-      text-align:left;
-      border:1px solid transparent;
-      border-radius:10px;
-      background:transparent;
-      color:#c2bfd6;
-      margin:3px 0;
-    }
+    .nav-btn { width:100%; display:flex; gap:10px; align-items:center; padding:12px; text-align:left; border:1px solid transparent; border-radius:10px; background:transparent; color:#c2bfd6; margin:3px 0; }
     .nav-btn:hover,.nav-btn.active { background:#1a1929; color:white; border-color:#302c47; }
     .sidebar-bottom { margin-top:auto; }
     .account-box { background:var(--panel); border:1px solid var(--border); border-radius:13px; padding:12px; }
@@ -131,16 +56,7 @@
     .credit-label { font-size:12px; color:var(--muted); }
 
     main { min-width:0; display:flex; flex-direction:column; min-height:100vh; }
-    header {
-      min-height:66px;
-      padding:12px 22px;
-      border-bottom:1px solid var(--border);
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:12px;
-      background:#0b0b12ee;
-    }
+    header { min-height:66px; padding:12px 22px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:12px; background:#0b0b12ee; }
     .header-title { font-weight:700; }
     .header-right { display:flex; gap:8px; align-items:center; }
     .status-pill { font-size:11px; border:1px solid #3b3652; border-radius:30px; padding:6px 9px; color:#d3c6ff; background:#1b1729; }
@@ -152,13 +68,7 @@
     .section-heading { font-size:14px; color:#c9c5dd; margin:25px 0 12px; }
 
     .tool-grid,.plan-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
-    .tool-card,.panel,.plan-card {
-      padding:17px;
-      border:1px solid var(--border);
-      border-radius:15px;
-      background:var(--panel);
-      min-width:0;
-    }
+    .tool-card,.panel,.plan-card { padding:17px; border:1px solid var(--border); border-radius:15px; background:var(--panel); min-width:0; }
     .tool-card { color:var(--text); text-decoration:none; display:block; transition:border-color .15s; }
     .tool-card:hover { border-color:#7f69ba; }
     .tool-icon { font-size:24px; margin-bottom:12px; }
@@ -178,22 +88,18 @@
     .message.assistant { align-self:flex-start; background:#1a1a28; border:1px solid #303044; }
     .message .message-label { display:block; font-size:10px; letter-spacing:.7px; color:#b7a3f7; margin-bottom:5px; font-weight:750; }
     .thinking .dots::after { content:""; animation:dots 1.2s steps(4,end) infinite; }
-    @keyframes dots {
-      0% { content:""; } 25% { content:"."; } 50% { content:".."; } 75% { content:"..."; } 100% { content:""; }
-    }
+    @keyframes dots { 0% { content:""; } 25% { content:"."; } 50% { content:".."; } 75% { content:"..."; } 100% { content:""; } }
     .chat-compose { padding:12px; border-top:1px solid var(--border); background:#13131f; }
     #prompt { display:block; width:100%; min-height:75px; max-height:180px; resize:vertical; padding:13px; background:#0c0c15; color:white; border:1px solid #35354a; border-radius:12px; }
     .compose-bottom { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-top:10px; }
     .compose-bottom .small { max-width:70%; }
     .footer-note { color:#77758b; text-align:center; font-size:11px; line-height:1.6; padding:20px 10px 0; }
-
     .plan-card { display:flex; flex-direction:column; gap:10px; }
     .plan-card h3 { margin:0; font-size:16px; }
     .plan-price { font-size:28px; font-weight:850; }
     .plan-card ul { padding-left:18px; color:var(--muted); font-size:13px; line-height:1.9; }
     .plan-card .btn { margin-top:auto; }
     .plan-tag { color:var(--accent); font-size:11px; font-weight:800; letter-spacing:1px; }
-    .footer-note a { color:#c5b5ff; }
 
     @media(max-width:760px) {
       #appScreen { grid-template-columns:1fr; }
@@ -209,9 +115,7 @@
       .tool-grid,.plan-grid { grid-template-columns:1fr; }
       #messages { max-height:360px; }
     }
-    @media(prefers-reduced-motion:reduce) {
-      *,*::before,*::after { animation:none!important; transition:none!important; }
-    }
+    @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none!important; transition:none!important; } }
   </style>
 </head>
 
@@ -240,7 +144,10 @@
   <aside>
     <div class="brand-row">
       <div class="logo">N</div>
-      <div><div class="brand-name">NEXA <span class="brand">AI</span></div><div class="small muted">KNOWLEDGE WORKSPACE</div></div>
+      <div>
+        <div class="brand-name">NEXA <span class="brand">AI</span></div>
+        <div class="small muted">KNOWLEDGE WORKSPACE</div>
+      </div>
     </div>
     <div class="mobile-brand">NEXA <span class="brand">AI</span></div>
     <nav class="nav-group" aria-label="Main navigation">
@@ -278,7 +185,7 @@
         </div>
         <div class="panel">
           <h2>Your NEXA workspace</h2>
-          <p>Use the local Ollama model on this PC. Keep Ollama running while chatting.</p>
+          <p>Ask questions, learn concepts, brainstorm ideas, and work through problems.</p>
           <button class="btn primary" data-go="chat">Open AI Assistant →</button>
         </div>
         <h2 class="section-heading">Explore AI tools</h2>
@@ -296,15 +203,18 @@
           <p>Ask a question, explore an idea, or work through a problem.</p>
         </div>
         <div class="chat-panel">
-          <div class="chat-top"><strong>✳ NEXA Assistant · Ollama</strong><button class="btn secondary" id="clearChat">Clear chat</button></div>
+          <div class="chat-top">
+            <strong>✳ NEXA Assistant · Gemini</strong>
+            <button class="btn secondary" id="clearChat">Clear chat</button>
+          </div>
           <div id="messages" aria-live="polite">
-            <div class="message assistant"><span class="message-label">NEXA</span>Hi! I'm ready to answer using the Ollama model on your PC.</div>
+            <div class="message assistant"><span class="message-label">NEXA</span>Hi! I'm ready to help. What would you like to explore?</div>
           </div>
           <form class="chat-compose" id="chatForm">
             <label class="small muted" for="prompt">Your message</label>
             <textarea id="prompt" maxlength="8000" placeholder="Ask anything..." required></textarea>
             <div class="compose-bottom">
-              <span class="small muted">Local model · No web search connected</span>
+              <span class="small muted">Cloud AI · Web search not connected</span>
               <button class="btn primary" id="sendBtn" type="submit">Send ↑</button>
             </div>
           </form>
@@ -331,7 +241,7 @@
           <p>Purchases will only be enabled after secure payment verification and server-side credit updates are implemented. No payment will be taken here.</p>
         </div>
         <div class="plan-grid" id="planGrid"></div>
-        <p class="footer-note">Prices shown are proposed plans, not active offers. A parent or guardian should handle any real-money payment account setup where required.</p>
+        <p class="footer-note">Prices are proposed plans, not active offers. Final benefits and credit amounts are not set.</p>
       </section>
 
       <section class="page hidden" id="page-account">
@@ -354,13 +264,9 @@
 </div>
 
 <script>
-  // SUPABASE: use your project's root URL, not /rest/v1/
+  // Supabase project settings. The publishable key is designed for frontend use.
   const SUPABASE_URL = "https://kvuslfmgrbtcdnauoild.supabase.co";
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_Tyt5Fi79eJVuXqzUIK_F9Q_ggfWwnvJ";
-
-  // LOCAL AI: works only when this PC's Ollama is running.
-  const AI_BACKEND_URL = "http://localhost:11434/api/chat";
-  const OLLAMA_MODEL = "gemma3:1b";
 
   let db = null;
   let currentUser = null;
@@ -393,8 +299,11 @@
     setText("sidebarCredits", "...");
     setText("accountCredits", "Loading...");
 
-    const { data, error } = await db.from("profiles")
-      .select("credits").eq("id", currentUser.id).maybeSingle();
+    const { data, error } = await db
+      .from("profiles")
+      .select("credits")
+      .eq("id", currentUser.id)
+      .maybeSingle();
 
     if (error) {
       setText("sidebarCredits", "—");
@@ -402,29 +311,37 @@
       appMessage("Profile error: " + error.message);
       return;
     }
+
     if (!data) {
       setText("sidebarCredits", "—");
       setText("accountCredits", "Profile not found");
-      appMessage("Your profile was not found. Check the signup trigger.");
+      appMessage("Profile not found. Check your profile creation trigger and RLS policies.");
       return;
     }
+
     setText("sidebarCredits", String(data.credits));
     setText("accountCredits", String(data.credits));
-    appMessage("Supabase connected successfully.");
   }
 
   async function signUp() {
     const email = $("email").value.trim();
     const password = $("password").value;
+
     if (!email || password.length < 6) {
       authMessage("Enter a valid email and a password of at least 6 characters.");
       return;
     }
+
     $("signupBtn").disabled = true;
     authMessage("Creating your account...");
+
     try {
       const { data, error } = await db.auth.signUp({ email, password });
-      if (error) { authMessage(error.message); return; }
+      if (error) {
+        authMessage(error.message);
+        return;
+      }
+
       if (data.session && data.user) {
         showApp(data.user);
         await loadProfile();
@@ -441,15 +358,24 @@
 
   async function signIn(event) {
     if (event) event.preventDefault();
+
     const email = $("email").value.trim();
     const password = $("password").value;
-    if (!email || !password) { authMessage("Enter your email and password."); return; }
+    if (!email || !password) {
+      authMessage("Enter your email and password.");
+      return;
+    }
 
     $("loginBtn").disabled = true;
     authMessage("Logging in...");
+
     try {
       const { data, error } = await db.auth.signInWithPassword({ email, password });
-      if (error) { authMessage(error.message); return; }
+      if (error) {
+        authMessage(error.message);
+        return;
+      }
+
       showApp(data.user);
       await loadProfile();
       authMessage("");
@@ -463,7 +389,13 @@
   async function signOut() {
     if (!db) return;
     const { error } = await db.auth.signOut();
-    if (error) { appMessage("Could not log out: " + error.message); return; }
+
+    if (error) {
+      appMessage("Could not log out: " + error.message);
+      return;
+    }
+
+    conversation = [];
     showAuth();
     authMessage("You have logged out.");
   }
@@ -472,10 +404,12 @@
     document.querySelectorAll(".page").forEach(page => page.classList.add("hidden"));
     const target = $("page-" + pageName);
     if (!target) return;
+
     target.classList.remove("hidden");
     document.querySelectorAll("[data-page]").forEach(button => {
       button.classList.toggle("active", button.dataset.page === pageName);
     });
+
     const titles = {
       home:"Home", chat:"AI Assistant", tools:"AI Tools",
       plans:"Plans & Premium", account:"Account"
@@ -511,7 +445,11 @@
   async function sendPrompt(event) {
     event.preventDefault();
     if (busy) return;
-    if (!currentUser) { appMessage("Please log in first."); return; }
+
+    if (!currentUser) {
+      appMessage("Please log in first.");
+      return;
+    }
 
     const prompt = $("prompt").value.trim();
     if (!prompt) return;
@@ -527,39 +465,36 @@
     conversation.push({ role: "user", content: prompt });
 
     try {
-      const response = await fetch(AI_BACKEND_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: OLLAMA_MODEL,
-          messages: [
-            {
-              role: "system",
-              content: "You are NEXA AI, a helpful assistant. Answer clearly and honestly. Use the user's language when possible. Do not claim to search the web unless you actually used a search tool."
-            },
-            ...conversation.slice(-12)
-          ],
-          stream: false
-        })
+      // The Gemini API key stays in the Supabase Edge Function secret.
+      const { data, error } = await db.functions.invoke("nexa-chat", {
+        body: { messages: conversation.slice(-12) }
       });
 
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(result.error || "Ollama error: " + response.status);
+      if (error) {
+        let details = error.message || "Function request failed.";
+        if (error.context && typeof error.context.json === "function") {
+          try {
+            const responseBody = await error.context.json();
+            if (responseBody && responseBody.error) details = responseBody.error;
+          } catch (_) {}
+        }
+        throw new Error(details);
+      }
 
-      const answer = result.message && result.message.content
-        ? result.message.content.trim() : "";
-      if (!answer) throw new Error("The model returned an empty answer.");
+      if (data?.error) throw new Error(data.error);
+
+      const answer = data?.message?.content?.trim();
+      if (!answer) throw new Error("No answer received from Gemini.");
 
       conversation.push({ role: "assistant", content: answer });
       thinking.remove();
       addMessage("assistant", answer);
-      appMessage("Answer received from your local Ollama model.");
+      appMessage("Connected to Gemini AI.");
     } catch (error) {
       conversation.pop();
       thinking.remove();
-      addMessage("assistant",
-        "I couldn't connect to Ollama. Check that Ollama is running and that your browser allows this local connection.");
-      appMessage("Connection error: " + (error.message || "Unknown error"));
+      addMessage("assistant", "I couldn't get an AI response. Please try again.");
+      appMessage("AI connection error: " + (error.message || "Unknown error"));
     } finally {
       busy = false;
       $("sendBtn").disabled = false;
@@ -575,17 +510,15 @@
     appMessage("");
   });
 
-  // Display proposed plans. Purchases remain disabled until secure payments exist.
   const plans = [
-    { name:"Starter", price:"₹99", credits:"Proposed starter pack" },
-    { name:"Plus", price:"₹499", credits:"Proposed plus pack" },
-    { name:"Pro", price:"₹999", credits:"Proposed pro pack" },
-    { name:"Power", price:"₹1,999", credits:"Proposed power pack" },
-    { name:"Ultra", price:"₹4,999", credits:"Proposed ultra pack" },
-    { name:"Max", price:"₹9,999", credits:"Proposed max pack" }
+    { name:"Starter", price:"₹99" },
+    { name:"Plus", price:"₹499" },
+    { name:"Pro", price:"₹999" },
+    { name:"Power", price:"₹1,999" },
+    { name:"Ultra", price:"₹4,999" },
+    { name:"Max", price:"₹9,999" }
   ];
 
-  const planGrid = $("planGrid");
   plans.forEach(plan => {
     const card = document.createElement("article");
     card.className = "plan-card";
@@ -602,10 +535,10 @@
     price.textContent = plan.price;
 
     const description = document.createElement("p");
-    description.textContent = plan.credits + ". Final benefits and credits have not been set.";
+    description.textContent = "Proposed plan. Benefits and credit amount are not set yet.";
 
     const list = document.createElement("ul");
-    ["Payment not active", "No charge will be made", "Credit amount to be confirmed"].forEach(item => {
+    ["Payment not active", "No charge will be made", "Benefits to be confirmed"].forEach(item => {
       const li = document.createElement("li");
       li.textContent = item;
       list.appendChild(li);
@@ -616,11 +549,11 @@
     button.type = "button";
     button.textContent = "Coming soon";
     button.addEventListener("click", () => {
-      appMessage("Payments are not active yet. No money has been charged.");
+      appMessage("Payments are not active. No money has been charged.");
     });
 
     card.append(tag, title, price, description, list, button);
-    planGrid.appendChild(card);
+    $("planGrid").appendChild(card);
   });
 
   $("chatForm").addEventListener("submit", sendPrompt);
@@ -636,12 +569,17 @@
       authMessage("Supabase library did not load. Check your internet connection.");
       return;
     }
+
     try {
       db = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-      const { data, error } = await db.auth.getSession();
-      if (error) { authMessage(error.message); return; }
 
-      if (data.session && data.session.user) {
+      const { data, error } = await db.auth.getSession();
+      if (error) {
+        authMessage(error.message);
+        return;
+      }
+
+      if (data.session?.user) {
         showApp(data.session.user);
         await loadProfile();
       } else {
@@ -649,14 +587,14 @@
       }
 
       db.auth.onAuthStateChange((event, session) => {
-        if (session && session.user) {
+        if (session?.user) {
           showApp(session.user);
         } else {
           showAuth();
         }
       });
     } catch (error) {
-      authMessage("Setup error: " + error.message);
+      authMessage("Setup error: " + (error.message || "Unknown error"));
     }
   }
 
