@@ -3,196 +3,1064 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>NEXA AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b0b12">
+  <title>NEXA AI — Your AI Workspace</title>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
+    :root {
+      --bg: #0b0b12;
+      --panel: #12121d;
+      --panel2: #191927;
+      --border: #29293b;
+      --text: #f4f2ff;
+      --muted: #a3a1ba;
+      --accent: #a78bfa;
+      --accent2: #7c5ce7;
+      --green: #62d6a5;
+      --danger: #ff8585;
+    }
+
     * { box-sizing: border-box; }
+
     body {
-      margin: 0; min-height: 100vh; padding: 24px;
-      display: grid; place-items: center;
-      background: #0b0b12; color: #f5f3ff;
-      font: 16px Arial, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, Arial, sans-serif;
     }
+
+    button, input, textarea { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible,
+    textarea:focus-visible, a:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    .hidden { display: none !important; }
+
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; line-height: 1.6; }
+    .brand { color: var(--accent); }
+    .primary {
+      background: var(--accent);
+      color: #171024;
+      border: 0;
+      font-weight: 750;
+    }
+    .secondary {
+      background: var(--panel2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn {
+      min-height: 42px;
+      border-radius: 11px;
+      padding: 10px 14px;
+    }
+    .btn:disabled { opacity: .55; cursor: not-allowed; }
+
+    /* Authentication screen */
+    #authScreen {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+      background:
+        radial-gradient(ellipse at 50% 0%, #35245d55, transparent 55%),
+        var(--bg);
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 410px;
+      padding: 30px;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background: #12121deF;
+      box-shadow: 0 20px 70px #0005;
+    }
+
+    .logo {
+      display: inline-grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, #c4b5fd, #8060df);
+      color: #171024;
+      font-weight: 900;
+      font-size: 23px;
+      margin-bottom: 14px;
+    }
+
+    h1, h2, h3, p { overflow-wrap: anywhere; }
+    .auth-card h1 { margin: 0 0 8px; font-size: 30px; }
+    .auth-card p { color: var(--muted); line-height: 1.6; }
+
+    .field-label {
+      display: block;
+      font-size: 13px;
+      margin: 16px 0 7px;
+      color: #d9d5ef;
+    }
+
+    .field {
+      width: 100%;
+      min-height: 45px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background: #0b0b12;
+      color: var(--text);
+    }
+
+    .auth-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 17px;
+    }
+
+    #authStatus, #appStatus {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+
+    /* Main app layout */
+    #appScreen {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 245px minmax(0, 1fr);
+    }
+
+    aside {
+      border-right: 1px solid var(--border);
+      background: #0e0e17;
+      padding: 20px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      min-width: 0;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 8px;
+    }
+
+    .brand-row .logo {
+      width: 35px;
+      height: 35px;
+      font-size: 20px;
+      margin: 0;
+      border-radius: 11px;
+    }
+
+    .brand-name { font-weight: 850; letter-spacing: 1px; }
+    .nav-title {
+      color: #79778f;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      padding: 0 10px;
+      margin: 7px 0;
+    }
+
+    .nav-btn {
+      width: 100%;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 12px;
+      text-align: left;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      background: transparent;
+      color: #c2bfd6;
+      margin: 3px 0;
+    }
+
+    .nav-btn:hover, .nav-btn.active {
+      background: #1a1929;
+      color: white;
+      border-color: #302c47;
+    }
+
+    .sidebar-bottom { margin-top: auto; }
+    .account-box {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      padding: 12px;
+      min-width: 0;
+    }
+    .account-email {
+      font-size: 12px;
+      overflow-wrap: anywhere;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .credits-value { font-size: 23px; font-weight: 800; }
+    .credit-label { font-size: 12px; color: var(--muted); }
+
     main {
-      width: 100%; max-width: 420px; padding: 28px;
-      background: #151521; border: 1px solid #303044;
-      border-radius: 20px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
-    h1 { margin-top: 0; color: #b9a4ff; }
-    p { color: #b9b8cc; line-height: 1.5; }
-    input, button {
-      width: 100%; padding: 13px; margin-top: 12px;
-      border-radius: 10px; font-size: 16px;
+
+    header {
+      min-height: 66px;
+      padding: 12px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      background: #0b0b12ee;
     }
-    input {
-      color: white; background: #0d0d17;
-      border: 1px solid #41415a;
+
+    .header-title { font-weight: 700; }
+    .header-right { display: flex; gap: 8px; align-items: center; }
+
+    .status-pill {
+      font-size: 11px;
+      border: 1px solid #3b3652;
+      border-radius: 30px;
+      padding: 6px 9px;
+      color: #d3c6ff;
+      background: #1b1729;
     }
-    button {
-      cursor: pointer; border: 0; font-weight: bold;
-      background: #a78bfa; color: #171126;
+
+    .mobile-brand { display: none; }
+
+    .content {
+      width: 100%;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 28px 22px 24px;
+      flex: 1;
     }
-    button.secondary { background: #303044; color: white; }
-    #status { overflow-wrap: anywhere; font-size: 14px; }
-    .hidden { display: none; }
+
+    .welcome { margin-bottom: 25px; }
+    .welcome h1 { margin: 0 0 8px; font-size: clamp(25px, 4vw, 36px); }
+    .welcome p { color: var(--muted); margin: 0; line-height: 1.7; }
+
+    .section-heading {
+      font-size: 14px;
+      color: #c9c5dd;
+      margin: 25px 0 12px;
+    }
+
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .tool-card {
+      padding: 17px;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      background: var(--panel);
+      color: var(--text);
+      text-decoration: none;
+      transition: border-color .15s, transform .15s;
+      display: block;
+      min-width: 0;
+    }
+
+    .tool-card:hover {
+      border-color: #7f69ba;
+      transform: translateY(-2px);
+    }
+
+    .tool-icon { font-size: 24px; margin-bottom: 12px; }
+    .tool-card strong { display: block; font-size: 14px; margin-bottom: 6px; }
+    .tool-card p { color: var(--muted); font-size: 12px; line-height: 1.6; margin: 0; }
+
+    .chat-panel {
+      border: 1px solid var(--border);
+      border-radius: 17px;
+      background: #10101a;
+      overflow: hidden;
+    }
+
+    .chat-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .chat-top strong { font-size: 14px; }
+    .chat-top .btn { min-height: 33px; padding: 7px 10px; font-size: 12px; }
+
+    #messages {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      padding: 17px;
+      min-height: 160px;
+      max-height: 420px;
+      overflow-y: auto;
+    }
+
+    .message {
+      max-width: 88%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      line-height: 1.7;
+      font-size: 14px;
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+    }
+
+    .message.user {
+      align-self: flex-end;
+      background: #342953;
+      border: 1px solid #4b3b70;
+    }
+
+    .message.assistant {
+      align-self: flex-start;
+      background: #1a1a28;
+      border: 1px solid #303044;
+    }
+
+    .message .message-label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: .7px;
+      color: #b7a3f7;
+      margin-bottom: 5px;
+      font-weight: 750;
+    }
+
+    .chat-compose {
+      padding: 12px;
+      border-top: 1px solid var(--border);
+      background: #13131f;
+    }
+
+    #prompt {
+      display: block;
+      width: 100%;
+      min-height: 75px;
+      max-height: 180px;
+      resize: vertical;
+      padding: 13px;
+      background: #0c0c15;
+      color: white;
+      border: 1px solid #35354a;
+      border-radius: 12px;
+      outline-offset: 2px;
+    }
+
+    .compose-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 10px;
+    }
+
+    .compose-bottom .small { max-width: 70%; }
+
+    .panel {
+      padding: 20px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      margin-bottom: 15px;
+    }
+
+    .panel h2 { margin: 0 0 10px; font-size: 18px; }
+    .panel p { color: var(--muted); line-height: 1.7; font-size: 14px; }
+    .panel a { color: #c5b5ff; }
+
+    .footer-note {
+      color: #77758b;
+      text-align: center;
+      font-size: 11px;
+      line-height: 1.6;
+      padding: 20px 10px 0;
+    }
+
+    @media (max-width: 760px) {
+      #appScreen { grid-template-columns: 1fr; }
+
+      aside {
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+        padding: 12px;
+        gap: 10px;
+      }
+
+      .brand-row { display: none; }
+      .mobile-brand { display: block; font-weight: 800; }
+      .nav-title { display: none; }
+
+      .nav-group {
+        display: flex;
+        overflow-x: auto;
+        gap: 5px;
+      }
+
+      .nav-btn {
+        width: auto;
+        flex: 0 0 auto;
+        white-space: nowrap;
+        padding: 9px 11px;
+        font-size: 12px;
+      }
+
+      .sidebar-bottom { display: none; }
+      header { padding: 12px 15px; min-height: 58px; }
+      .content { padding: 22px 14px; }
+      .tool-grid { grid-template-columns: 1fr; }
+      .tool-card { padding: 14px; }
+      .tool-icon { margin-bottom: 6px; }
+      #messages { max-height: 360px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition: none !important;
+      }
+    }
   </style>
 </head>
+
 <body>
-<main>
-  <h1>NEXA AI</h1>
-  <p>Your AI workspace starts here.</p>
 
-  <section id="auth">
-    <input id="email" type="email" placeholder="Email address"
-      autocomplete="email">
-    <input id="password" type="password" placeholder="Password"
-      autocomplete="current-password">
-    <button id="signup">Create account</button>
-    <button id="login" class="secondary">Log in</button>
+  <!-- LOGIN / SIGNUP -->
+  <section id="authScreen">
+    <div class="auth-card">
+      <div class="logo">N</div>
+      <h1>NEXA <span class="brand">AI</span></h1>
+      <p>Your AI workspace starts here. Sign in to access your workspace.</p>
+
+      <form id="authForm">
+        <label class="field-label" for="email">Email address</label>
+        <input class="field" id="email" type="email"
+          placeholder="you@example.com" autocomplete="email" required>
+
+        <label class="field-label" for="password">Password</label>
+        <input class="field" id="password" type="password"
+          placeholder="At least 6 characters" minlength="6"
+          autocomplete="current-password" required>
+
+        <div class="auth-actions">
+          <button class="btn primary" id="signupBtn" type="button">
+            Create account
+          </button>
+          <button class="btn secondary" id="loginBtn" type="submit">
+            Log in
+          </button>
+        </div>
+      </form>
+
+      <p id="authStatus" role="status" aria-live="polite"></p>
+      <p class="small">
+        Your account is managed securely by Supabase. Never share your password.
+      </p>
+    </div>
   </section>
 
-  <section id="dashboard" class="hidden">
-    <p id="welcome"></p>
-    <h2>My credits</h2>
-    <p id="credits">Loading...</p>
-    <button id="logout" class="secondary">Log out</button>
-  </section>
+  <!-- MAIN WORKSPACE -->
+  <div id="appScreen" class="hidden">
 
-  <p id="status" role="status" aria-live="polite"></p>
-</main>
+    <aside>
+      <div class="brand-row">
+        <div class="logo">N</div>
+        <div>
+          <div class="brand-name">NEXA <span class="brand">AI</span></div>
+          <div class="small muted">KNOWLEDGE WORKSPACE</div>
+        </div>
+      </div>
+
+      <div class="mobile-brand">NEXA <span class="brand">AI</span></div>
+
+      <nav class="nav-group" aria-label="Main navigation">
+        <button class="nav-btn active" data-page="home">⌂ Home</button>
+        <button class="nav-btn" data-page="chat">✳ AI Assistant</button>
+        <button class="nav-btn" data-page="tools">◇ AI Tools</button>
+        <button class="nav-btn" data-page="account">◎ Account</button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="account-box">
+          <div class="small muted">SIGNED IN AS</div>
+          <div class="account-email" id="sidebarEmail">Loading...</div>
+          <div class="credits-value" id="sidebarCredits">—</div>
+          <div class="credit-label">Available credits</div>
+          <button class="btn secondary" id="sidebarLogout"
+            style="width:100%;margin-top:14px">Log out</button>
+        </div>
+      </div>
+    </aside>
+
+    <main>
+      <header>
+        <div class="header-title" id="headerTitle">Home</div>
+        <div class="header-right">
+          <span class="status-pill" id="connectionStatus">Checking...</span>
+          <button class="btn secondary" id="headerLogout">Log out</button>
+        </div>
+      </header>
+
+      <div class="content">
+
+        <!-- HOME PAGE -->
+        <section class="page" id="page-home">
+          <div class="welcome">
+            <h1>Better questions. <span class="brand">Better days.</span></h1>
+            <p>Welcome to your workspace. What would you like to explore today?</p>
+          </div>
+
+          <div class="panel">
+            <h2>Your NEXA workspace</h2>
+            <p>
+              Your account is connected. Open the assistant to send a prompt
+              once the secure AI backend is configured.
+            </p>
+            <button class="btn primary" data-go="chat">Open AI Assistant →</button>
+          </div>
+
+          <h2 class="section-heading">Explore AI tools</h2>
+          <div class="tool-grid">
+            <a class="tool-card" href="https://chatgpt.com/"
+              target="_blank" rel="noopener noreferrer">
+              <div class="tool-icon">✳</div>
+              <strong>ChatGPT</strong>
+              <p>Open the official ChatGPT website.</p>
+            </a>
+            <a class="tool-card" href="https://gemini.google.com/"
+              target="_blank" rel="noopener noreferrer">
+              <div class="tool-icon">✧</div>
+              <strong>Google Gemini</strong>
+              <p>Open the official Gemini website.</p>
+            </a>
+            <a class="tool-card" href="https://claude.ai/"
+              target="_blank" rel="noopener noreferrer">
+              <div class="tool-icon">◇</div>
+              <strong>Claude</strong>
+              <p>Open the official Claude website.</p>
+            </a>
+          </div>
+
+          <p class="footer-note">
+            External AI tools have their own accounts, rules and pricing.
+            NEXA credits do not pay for external websites.
+          </p>
+        </section>
+
+        <!-- CHAT PAGE -->
+        <section class="page hidden" id="page-chat">
+          <div class="welcome">
+            <h1>AI <span class="brand">Assistant</span></h1>
+            <p>Ask a question, explore an idea, or work through a problem.</p>
+          </div>
+
+          <div class="chat-panel">
+            <div class="chat-top">
+              <strong>✳ NEXA Assistant</strong>
+              <button class="btn secondary" id="clearChat">Clear chat</button>
+            </div>
+
+            <div id="messages" aria-live="polite">
+              <div class="message assistant">
+                <span class="message-label">NEXA</span>
+                Welcome! Your workspace is ready. The AI backend still needs
+                to be configured before I can generate real AI answers.
+              </div>
+            </div>
+
+            <form class="chat-compose" id="chatForm">
+              <label class="small muted" for="prompt">Your message</label>
+              <textarea id="prompt" maxlength="8000"
+                placeholder="Ask anything..." required></textarea>
+
+              <div class="compose-bottom">
+                <span class="small muted">Never enter passwords or private keys.</span>
+                <button class="btn primary" id="sendBtn" type="submit">
+                  Send ↑
+                </button>
+              </div>
+            </form>
+          </div>
+          <p id="appStatus" role="status" aria-live="polite"></p>
+        </section>
+
+        <!-- TOOLS PAGE -->
+        <section class="page hidden" id="page-tools">
+          <div class="welcome">
+            <h1>AI <span class="brand">Tools</span></h1>
+            <p>Open external AI services directly on their official websites.</p>
+          </div>
+
+          <div class="tool-grid">
+            <a class="tool-card" href="https://chatgpt.com/"
+              target="_blank" rel="noopener noreferrer">
+              <div class="tool-icon">✳</div>
+              <strong>ChatGPT</strong>
+              <p>Open ChatGPT in a new tab.</p>
+            </a>
+            <a class="tool-card" href="https://gemini.google.com/"
+              target="_blank" rel="noopener noreferrer">
+              <div class="tool-icon">✧</div>
+              <strong>Gemini</strong>
+              <p>Open Google Gemini in a new tab.</p>
+            </a>
+            <a class="tool-card" href="https://claude.ai/"
+              target="_blank" rel="noopener noreferrer">
+              <div class="tool-icon">◇</div>
+              <strong>Claude</strong>
+              <p>Open Claude in a new tab.</p>
+            </a>
+          </div>
+
+          <p class="footer-note">
+            These links are independent third-party services, not models hosted by NEXA.
+          </p>
+        </section>
+
+        <!-- ACCOUNT PAGE -->
+        <section class="page hidden" id="page-account">
+          <div class="welcome">
+            <h1>Your <span class="brand">Account</span></h1>
+            <p>Manage your current NEXA AI session.</p>
+          </div>
+
+          <div class="panel">
+            <h2>Profile</h2>
+            <p>Email: <strong id="accountEmail">Loading...</strong></p>
+            <p>Available credits: <strong id="accountCredits">—</strong></p>
+            <p class="small">
+              Credits are read from Supabase. This page cannot add credits.
+            </p>
+            <button class="btn secondary" id="refreshProfile">Refresh profile</button>
+            <button class="btn primary" id="accountLogout">Log out</button>
+          </div>
+
+          <div class="panel">
+            <h2>Security</h2>
+            <p>
+              Your Supabase publishable key is intended for browser use with
+              correctly configured Row Level Security. Never expose a secret
+              or service-role key in this file.
+            </p>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
 
 <script>
-  // Replace these placeholders with your Supabase Project URL
-  // and Publishable key. Never use a secret/service_role key here.
-  const SUPABASE_URL = "https://kvuslfmgrbtcdnauoild.supabase.co";
-  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_Tyt5Fi79eJVuXqzUIK_F9Q_ggfWwnvJ";
+  // ==========================================
+  // 1. SUPABASE CONFIGURATION
+  // Keep your existing project values here.
+  // Never put a secret/service_role key here.
+  // ==========================================
 
-  const authPanel = document.getElementById("auth");
-  const dashboard = document.getElementById("dashboard");
-  const statusBox = document.getElementById("status");
+  const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";
+  const SUPABASE_PUBLISHABLE_KEY = "YOUR_SUPABASE_PUBLISHABLE_KEY";
 
-  let db;
+  // ==========================================
+  // 2. AI BACKEND CONFIGURATION
+  // Add your deployed HTTPS Worker URL only
+  // after the secure backend has been created.
+  // Leave empty for now.
+  // ==========================================
 
-  function status(message) {
-    statusBox.textContent = message;
+  const AI_BACKEND_URL = "";
+
+  let db = null;
+  let currentUser = null;
+  let busy = false;
+
+  const $ = (id) => document.getElementById(id);
+
+  function setText(id, value) {
+    $(id).textContent = value;
   }
 
-  function showSignedIn(user) {
-    authPanel.classList.add("hidden");
-    dashboard.classList.remove("hidden");
-    document.getElementById("welcome").textContent =
-      "Logged in as " + user.email;
+  function authMessage(message) {
+    setText("authStatus", message);
   }
 
-  function showSignedOut() {
-    authPanel.classList.remove("hidden");
-    dashboard.classList.add("hidden");
-    document.getElementById("credits").textContent = "";
+  function appMessage(message) {
+    setText("appStatus", message);
   }
 
-  async function loadProfile(user) {
+  function showAuth() {
+    $("authScreen").classList.remove("hidden");
+    $("appScreen").classList.add("hidden");
+    currentUser = null;
+    setText("connectionStatus", "Signed out");
+  }
+
+  function showApp(user) {
+    currentUser = user;
+    $("authScreen").classList.add("hidden");
+    $("appScreen").classList.remove("hidden");
+
+    setText("sidebarEmail", user.email || "Signed in");
+    setText("accountEmail", user.email || "Signed in");
+    setText("connectionStatus", "Connected");
+  }
+
+  // ==========================================
+  // 3. PROFILE / CREDITS
+  // Read-only from the browser.
+  // Credit updates must be server-side.
+  // ==========================================
+
+  async function loadProfile() {
+    if (!db || !currentUser) return;
+
+    setText("sidebarCredits", "...");
+    setText("accountCredits", "Loading...");
+
     const { data, error } = await db
       .from("profiles")
       .select("credits")
-      .eq("id", user.id)
+      .eq("id", currentUser.id)
       .maybeSingle();
 
     if (error) {
-      status("Profile error: " + error.message);
+      setText("sidebarCredits", "—");
+      setText("accountCredits", "Unavailable");
+      appMessage("Profile error: " + error.message);
       return;
     }
 
     if (!data) {
-      document.getElementById("credits").textContent =
-        "Profile not available yet.";
+      setText("sidebarCredits", "—");
+      setText("accountCredits", "Profile not found");
+      appMessage("Your profile was not found. Check the signup trigger.");
       return;
     }
 
-    document.getElementById("credits").textContent =
-      data.credits + " credits";
-    status("Connected successfully.");
+    setText("sidebarCredits", String(data.credits));
+    setText("accountCredits", String(data.credits));
+    appMessage("Connected successfully.");
   }
 
-  async function init() {
-    if (SUPABASE_URL.startsWith("YOUR_") ||
-        SUPABASE_PUBLISHABLE_KEY.startsWith("YOUR_")) {
-      status("Add your Supabase URL and Publishable key first.");
+  // ==========================================
+  // 4. AUTHENTICATION
+  // ==========================================
+
+  async function signUp() {
+    const email = $("email").value.trim();
+    const password = $("password").value;
+
+    if (!email || password.length < 6) {
+      authMessage("Enter a valid email and a password of at least 6 characters.");
       return;
     }
 
-    db = window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_PUBLISHABLE_KEY
-    );
+    $("signupBtn").disabled = true;
+    authMessage("Creating your account...");
 
-    document.getElementById("signup").onclick = async () => {
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-
-      if (!email || password.length < 6) {
-        status("Enter an email and a password of at least 6 characters.");
-        return;
-      }
-
-      status("Creating account...");
+    try {
       const { data, error } = await db.auth.signUp({
         email,
         password
       });
 
-      if (error) return status(error.message);
-
-      if (data.session) {
-        showSignedIn(data.user);
-        await loadProfile(data.user);
-      } else {
-        status("Signup submitted. Check your email to confirm your account, then log in.");
+      if (error) {
+        authMessage(error.message);
+        return;
       }
-    };
 
-    document.getElementById("login").onclick = async () => {
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
+      if (data.session && data.user) {
+        showApp(data.user);
+        await loadProfile();
+        authMessage("");
+      } else {
+        authMessage(
+          "Signup submitted. If email confirmation is enabled, confirm your email. Otherwise, log in now."
+        );
+      }
+    } catch (err) {
+      authMessage("Could not create account. Check your internet connection.");
+    } finally {
+      $("signupBtn").disabled = false;
+    }
+  }
 
-      status("Logging in...");
+  async function signIn(event) {
+    if (event) event.preventDefault();
+
+    const email = $("email").value.trim();
+    const password = $("password").value;
+
+    if (!email || !password) {
+      authMessage("Enter your email and password.");
+      return;
+    }
+
+    $("loginBtn").disabled = true;
+    authMessage("Logging in...");
+
+    try {
       const { data, error } = await db.auth.signInWithPassword({
         email,
         password
       });
 
-      if (error) return status(error.message);
-
-      showSignedIn(data.user);
-      await loadProfile(data.user);
-    };
-
-    document.getElementById("logout").onclick = async () => {
-      const { error } = await db.auth.signOut();
-      if (error) return status(error.message);
-
-      showSignedOut();
-      status("Logged out.");
-    };
-
-    db.auth.onAuthStateChange((event, session) => {
-      if (session?.user) {
-        showSignedIn(session.user);
-      } else {
-        showSignedOut();
+      if (error) {
+        authMessage(error.message);
+        return;
       }
-    });
 
-    const { data, error } = await db.auth.getSession();
-    if (error) return status(error.message);
-
-    if (data.session?.user) {
-      showSignedIn(data.session.user);
-      await loadProfile(data.session.user);
+      showApp(data.user);
+      await loadProfile();
+      authMessage("");
+    } catch (err) {
+      authMessage("Login failed. Check your connection and try again.");
+    } finally {
+      $("loginBtn").disabled = false;
     }
   }
 
-  init();
+  async function signOut() {
+    if (!db) return;
+
+    const { error } = await db.auth.signOut();
+
+    if (error) {
+      appMessage("Could not log out: " + error.message);
+      return;
+    }
+
+    showAuth();
+    authMessage("You have logged out.");
+  }
+
+  // ==========================================
+  // 5. NAVIGATION
+  // ==========================================
+
+  function goTo(pageName) {
+    document.querySelectorAll(".page").forEach((page) => {
+      page.classList.add("hidden");
+    });
+
+    const target = $("page-" + pageName);
+    if (!target) return;
+
+    target.classList.remove("hidden");
+
+    document.querySelectorAll("[data-page]").forEach((button) => {
+      button.classList.toggle(
+        "active",
+        button.dataset.page === pageName
+      );
+    });
+
+    const titles = {
+      home: "Home",
+      chat: "AI Assistant",
+      tools: "AI Tools",
+      account: "Account"
+    };
+
+    setText("headerTitle", titles[pageName] || "NEXA AI");
+  }
+
+  document.querySelectorAll("[data-page]").forEach((button) => {
+    button.addEventListener("click", () => goTo(button.dataset.page));
+  });
+
+  document.querySelectorAll("[data-go]").forEach((button) => {
+    button.addEventListener("click", () => goTo(button.dataset.go));
+  });
+
+  // ==========================================
+  // 6. CHAT
+  // No fake AI response. Calls a real backend
+  // only when AI_BACKEND_URL is configured.
+  // ==========================================
+
+  function addMessage(role, content) {
+    const message = document.createElement("div");
+    message.className = "message " + role;
+
+    const label = document.createElement("span");
+    label.className = "message-label";
+    label.textContent = role === "user" ? "YOU" : "NEXA";
+
+    const body = document.createElement("div");
+    body.textContent = content;
+
+    message.append(label, body);
+    $("messages").appendChild(message);
+    $("messages").scrollTop = $("messages").scrollHeight;
+  }
+
+  async function sendPrompt(event) {
+    event.preventDefault();
+
+    if (busy) return;
+
+    if (!currentUser) {
+      appMessage("Please log in first.");
+      return;
+    }
+
+    const prompt = $("prompt").value.trim();
+    if (!prompt) return;
+
+    if (!AI_BACKEND_URL) {
+      appMessage(
+        "AI backend is not configured yet. Your login and database are working, but real AI answers need a secure server endpoint. No credits have been used."
+      );
+      return;
+    }
+
+    if (!AI_BACKEND_URL.startsWith("https://")) {
+      appMessage("The AI backend must use a valid HTTPS URL.");
+      return;
+    }
+
+    busy = true;
+    $("sendBtn").disabled = true;
+    $("prompt").disabled = true;
+
+    addMessage("user", prompt);
+    $("prompt").value = "";
+    appMessage("Sending your message...");
+
+    try {
+      const { data: sessionData, error: sessionError } =
+        await db.auth.getSession();
+
+      if (sessionError || !sessionData.session) {
+        throw new Error("Your session expired. Please log in again.");
+      }
+
+      const response = await fetch(AI_BACKEND_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + sessionData.session.access_token
+        },
+        body: JSON.stringify({ prompt })
+      });
+
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          result.error || "The AI service returned an error (" +
+          response.status + ")."
+        );
+      }
+
+      if (typeof result.answer !== "string" || !result.answer.trim()) {
+        throw new Error("The AI server returned no answer.");
+      }
+
+      addMessage("assistant", result.answer);
+      appMessage("Response received.");
+
+      // Refresh balance after a successful backend response.
+      await loadProfile();
+    } catch (error) {
+      appMessage(error.message || "Could not reach the AI service.");
+    } finally {
+      busy = false;
+      $("sendBtn").disabled = false;
+      $("prompt").disabled = false;
+      $("prompt").focus();
+    }
+  }
+
+  $("clearChat").addEventListener("click", () => {
+    $("messages").replaceChildren();
+    addMessage("assistant", "Chat cleared. What would you like to explore?");
+    appMessage("");
+  });
+
+  $("chatForm").addEventListener("submit", sendPrompt);
+  $("authForm").addEventListener("submit", signIn);
+  $("signupBtn").addEventListener("click", signUp);
+
+  $("sidebarLogout").addEventListener("click", signOut);
+  $("headerLogout").addEventListener("click", signOut);
+  $("accountLogout").addEventListener("click", signOut);
+  $("refreshProfile").addEventListener("click", loadProfile);
+
+  // ==========================================
+  // 7. STARTUP
+  // ==========================================
+
+  async function startApp() {
+    if (
+      SUPABASE_URL.startsWith("YOUR_") ||
+      SUPABASE_PUBLISHABLE_KEY.startsWith("YOUR_")
+    ) {
+      authMessage("Add your Supabase Project URL and Publishable key in the code.");
+      return;
+    }
+
+    if (!window.supabase) {
+      authMessage("Supabase library did not load. Check your internet connection.");
+      return;
+    }
+
+    try {
+      db = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+      );
+
+      const { data, error } = await db.auth.getSession();
+
+      if (error) {
+        authMessage(error.message);
+        return;
+      }
+
+      if (data.session && data.session.user) {
+        showApp(data.session.user);
+        await loadProfile();
+      } else {
+        showAuth();
+      }
+
+      db.auth.onAuthStateChange((event, session) => {
+        if (session && session.user) {
+          showApp(session.user);
+        } else {
+          showAuth();
+        }
+      });
+    } catch (error) {
+      authMessage("Setup error: " + error.message);
+    }
+  }
+
+  startApp();
 </script>
+
 </body>
 </html>
