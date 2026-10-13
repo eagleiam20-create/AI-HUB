@@ -1,0 +1,10 @@
+
+{
+  "appId": "com.nexa.ai",
+  "appName": "NEXA AI",
+  "webDir": "www",
+  "server": {
+    "url": "https://eagleiam20-create.github.io/AI-HUB/",
+    "cleartext": false
+  }
+}
